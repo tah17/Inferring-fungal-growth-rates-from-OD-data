@@ -1,0 +1,14 @@
+#PBS -e out/
+#PBS -o out/
+#PBS -j oe
+#PBS -l walltime=00:10:00
+#PBS -l select=1:ncpus=1:mem=24gb
+
+cd $HOME
+module load anaconda3/personal
+source activate r420
+cd Inferring-fungal-growth-rates-from-OD-data
+IC_USED=all_ICs
+FOLD_NO=$NULL
+echo "03a_data_idxs for $IC_USED and ${FOLD_NO:-5} folds is Job ID: $PBS_JOBID" >> log_file.$PBS_JOBID
+Rscript R/03_validate/03a_data_idxs.R $IC_USED $FOLD_NO
