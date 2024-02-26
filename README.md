@@ -23,10 +23,8 @@ in the R console when prompted.
 
 ## Usage
 
-The data of the experiment, performed by Dr. Natasha Motsi, is located in [`data/`](data).
-
 The code is intended to be run by using the .R scripts in the [`R/`](R) folder:
-* [`00_read_data/`](R/00_read_data/): Each script in this folder takes an excel spreadsheet of data from an experiment and stores the processed data as a tibble in the [`data/`](data) folder.
+* [`00_read_data/`](R/00_read_data/): Each script in this folder takes an excel spreadsheet of data from an experiment and stores the processed data as a tibble in a [`data/`](data) folder.
 * [`01_prior_pred.R`](R/01_prior_pred.R): For prior predictive and fake data checks of the models.  
 * [`02_post_pred.R`](R/02_post_pred.R): Samples from the posterior of the model when using all the data available. Performs a posterior predictive check.
 * [`03_validate/`](R/03_validate/): Scripts to conduct k-fold cross validation.
