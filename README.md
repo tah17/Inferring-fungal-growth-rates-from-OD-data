@@ -8,7 +8,7 @@
 * [License](#license)
 
 ## Introduction
-The repository holds the code for the manuscript Hameed _et al._ (2024), "Inferring fungal growth rates from optical density data".
+The repository holds the code for the manuscript [Hameed _et al._ (2024), "Inferring fungal growth rates from optical density data"](https://doi.org/10.1371/journal.pcbi.1012105).
 
 ## Technologies
 The code is written in R (v4.2.0) and Stan. Details of the packages and their versions can be found in the [renv.lock](renv.lock) file.
