@@ -1,46 +1,55 @@
 #
-# Script that plots supp figure S8: prior samples and data
+# Script that plots figure S8: plot of prior growth rates sensitivity
 #
 rm(list = ls())
 library(ggplot2)
 library(reshape2)
 library(tidyverse)
 library(cowplot)
-library(RColorBrewer)
+library(data.table)
+library(tidybayes)
+library(grid)
 seed <- 683861
 set.seed(seed)
-source("R/04_plot/functions.R")
 
 # Read in Data ------------------------------------------------------------
-readRDS(file = "data/OD_all_ICs.Rda") -> df
-fungal_ic_labels <- c(expression(0~'[N/'~mu~'l]'), expression(1~'[N/'~mu~'l]'), expression(10^1~'[N/'~mu~'l]'), expression(10^2~'[N/'~mu~'l]'), expression(10^3~'[N/'~mu~'l]'))
-df %>% mutate(fungal_ic_new = factor(fungal_ic, labels = fungal_ic_labels)) -> df
 #
-# read_prior
+# read in logistic model parameters and plot
 #
-model <- "logistic_OD_calibration"
-source(paste('models/OD/', model, '.data.R', sep = ""))
-summary_prior_pred <- readRDS(file=paste("output/OD/", model, "_prior.Rda", sep=""))
-y_reps <- summary_prior_pred[grep("^y_tot", row.names(summary_prior_pred)), ] #extracts the y replicates (which are samples from the prior pred) from summary_prior_pred
-#
-# plots the mean and 95% quantiles of the samples
-#
-cbind(get_processed_df(df), y_rep = y_reps$mean, y_rep_upper = y_reps$`97.5%`, y_rep_lower = y_reps$`2.5%`) %>%
-  mutate(mean_y_upper = mean(y_rep_upper)) %>%   #gets the mean of the quantiles of the y_reps
-  mutate(mean_y_lower = mean(y_rep_lower)) %>%
-  ggplot(aes(x = time, y = OD, group = interaction(fungal_ic, technical_reps, biological_reps))) +
-  geom_ribbon(aes(ymin = y_rep_lower, ymax = y_rep_upper), fill = "lightgrey", alpha = .5) +
-  geom_point(size=0.1) +
-  facet_grid(. ~ fungal_ic_new, labeller="label_parsed") +
-  scale_y_log10() +
-  geom_line(alpha=.5) +
-  theme_bw(base_size = 12) +
-  xlab("Time [hrs]") +
-  ylab("OD") -> p
+logistic_models <- c("OD/logistic", "OD/logistic_OD_calibration", "microscopy/logistic", "h1/logistic")
+lapply(logistic_models, function(x) readRDS(paste("output/", x, "_params.Rda", sep="")) %>%
+         mutate(Model=x)) %>%
+  rbindlist()  %>%
+  add_column(prior_type="Normal") -> parameters_normal
 
-tiff("FigS8.tif", width = 19, height = 5.5, units = "cm", res=300)
+lapply(logistic_models, function(x) readRDS(paste("output/", x, "_cauchy_beta_params.Rda", sep="")) %>%
+         mutate(Model=x)) %>%
+  rbindlist()  %>%
+  add_column(prior_type="Cauchy") -> parameters_cauchy
+
+parameters_logistic <- rbind(parameters_cauchy, parameters_normal)
+
+parameters_logistic %>%
+  mutate(data = case_when(Model%in%logistic_models[1:2] ~ "OD", Model==logistic_models[3] ~ "HL", Model==logistic_models[4] ~ "NC")) %>%
+  mutate(data_type = case_when(Model%in%logistic_models[1:2] ~ "Indirect", Model%in%logistic_models[3:4] ~ "Direct")) %>%
+  mutate(data = factor(data)) %>%
+  mutate(data_type = factor(data_type, levels = c("Direct", "Indirect"))) %>%
+  mutate(Model = factor(Model, levels=c("OD/logistic", "OD/logistic_OD_calibration", "h1/logistic", "microscopy/logistic"))) %>%
+  ggplot(aes(fill = data_type, color = prior_type, group=prior_type, x = .value, y = Model)) +
+  stat_pointinterval(position = position_dodge(0.3), point_size=1.7, .width = c(0.80, 0.95)) +
+  facet_grid(data_type ~ ., scales="free", space = "free_y", labeller = "label_parsed") +
+  theme_bw(base_size = 11) +
+  scale_x_continuous(breaks=c(1e-2, 1e-1, 1e-0), trans="log10",  labels = c(-2, -1, 0), limits = c(1e-2,1e-0)) +
+  scale_y_discrete(breaks=c("microscopy/logistic", "h1/logistic", "OD/logistic", "OD/logistic_OD_calibration"), labels = c("Logistic-HL", "Logistic-NC", "Logistic-OD", "Logistic-OD\n-calibration")) +
+  xlab(expression("log"[10]~"Inferred Hyphal Growth Rate")) +
+  ylab("Model") +
+  theme(strip.placement = "outside", strip.background = element_blank(), strip.text.y.right = element_text(angle = 0), axis.text.x = element_text(angle=0)) +
+  scale_color_manual(name = "Prior", breaks = c("Normal", "Cauchy"), values = c("#7b3294", "#008837")) +
+  scale_fill_manual(name = "Prior", breaks = c("Normal", "Cauchy"), values = c("#7b3294", "#008837")) -> p
+
+tiff("FigS8.tif", width = 14, height = 6.5, units = "cm", res=300)
 p
 dev.off()
-png("FigS8.png", width = 19, height = 5.5, units = "cm", res=300)
+png("FigS8.png", width = 14, height = 6.5, units = "cm", res=300)
 p
 dev.off()

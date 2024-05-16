@@ -53,10 +53,10 @@ legend <- get_legend(
 #
 if (IC_used =="high_IC") {
   tiff("FigS2.tif", width = 16, height = 8.8, units = "cm", res=300)
-  plot_grid(p + theme(legend.position="none") + scale_x_log10(breaks=c(0.01, 0.03, 0.1, 1, 10, 30, 100), labels = c(-2, -1.52, -1, 0, 1, 1.48, 2)), rel_heights = c(1, .1), legend, ncol=1)
+  plot_grid(p + theme(legend.position="none") + scale_x_log10(breaks=c(0.01, 0.03, 0.1, 1, 3, 5, 10, 30, 100), labels = c(-2, -1.52, -1, 0, 0.48, 0.70, 1, 1.48, 2)), rel_heights = c(1, .1), legend, ncol=1)  
   dev.off()
   png("FigS2.png", width = 16, height = 8.8, units = "cm", res=300)
-  plot_grid(p + theme(legend.position="none") + scale_x_log10(breaks=c(0.01, 0.03, 0.1, 1, 10, 30, 100), labels = c(-2, -1.52, -1, 0, 1, 1.48,  2)), rel_heights = c(1, .1), legend, ncol=1)
+  plot_grid(p + theme(legend.position="none") + scale_x_log10(breaks=c(0.01, 0.03, 0.1, 1, 3, 5, 10, 30, 100), labels = c(-2, -1.52, -1, 0, 0.48, 0.70, 1, 1.48, 2)), rel_heights = c(1, .1), legend, ncol=1)  
   dev.off()
 } else { 
   tiff("Fig4.tif", width = 16, height = 13, units = "cm", res=300)

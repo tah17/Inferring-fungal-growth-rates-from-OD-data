@@ -110,7 +110,7 @@ gp_fit_df %>%
     facet_grid(Model ~  fungal_ic_new, labeller=labeller(.cols=label_parsed), scales="free_y") +
     theme_bw(base_size = 11) +
     xlab("Time [hrs]") +
-    ylab(expression("log"[10]~paste(f(t), " [N/", mu, "l]"))) +
+    ylab(expression(paste(g(t), " [N/", mu, "l]"))) +
     theme(legend.position="none", text = element_text(size=11), strip.text.y.right = element_text(angle = 0), strip.background.y = element_blank()) -> p1
 #
 # plotting fits of GPs

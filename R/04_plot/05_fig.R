@@ -87,7 +87,7 @@ parameters_logistic %>%
   mutate(data_type = factor(data_type, levels = c("Direct", "Indirect"))) %>%
   mutate(Model = factor(Model, levels=c("OD/logistic_OD_calibration", "OD/logistic", "h1/logistic", "microscopy/logistic"))) %>%
   ggplot(aes(fill = data_type, color = Model, x = .value, y = Model)) +
-  stat_pointinterval(point_size=1.7) +
+  stat_pointinterval(point_size=1.7, .width = c(0.80, 0.95)) +
   facet_grid(data_type ~ ., scales="free", space = "free_y", labeller = "label_parsed") +
   theme_bw(base_size = 12) +
   scale_x_continuous(breaks=c(1e-2, 1e-1, 1e-0), trans="log10",  labels = c(-2, -1, 0), limits = c(1e-2,1e-0)) +

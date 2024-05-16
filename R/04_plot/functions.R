@@ -14,8 +14,8 @@ plot_RMSE_LPD <- function(df, colour_of_train, colour_of_test, og_data){
   df %>%
     filter(is.finite(Mean)) %>%
     filter(Metric%in%c("LPD", "RMSE")) %>%
-    group_by(Metric) %>%
-    mutate(Diff = max(Mean)-Mean) %>%
+    group_by(Metric, Training) %>%
+    mutate(Diff = max(Mean)-Mean + 1) %>%
     ungroup() %>%
     mutate(reference = factor(reference, levels=c("Our Model", "Reference Logistic Model \nwithout Calibration", "Reference Models \nwithout Calibration", "Reference Models \nwith Calibration", "Extensions"), 
                               labels = c(expression(paste("Our Model", sep="")), expression(paste(atop(textstyle('Reference Logistic Model'), textstyle('without Calibration')), sep="")), expression(paste(atop(textstyle('Reference Models'), textstyle('without Calibration')), sep="")), expression(paste(atop(textstyle('Reference Models'), textstyle('with Calibration')), sep="")), "Extensions"))) %>%

@@ -70,7 +70,7 @@ parameters_GP %>%
   mutate(Model = factor(Model, levels=c(GP_models[1], GP_models[2], GP_models[4], GP_models[3], GP_models[6], GP_models[5]))) %>%
   mutate(data = case_when(Model%in%GP_models[1:4] ~ "Indirect", Model%in%GP_models[5:6] ~ "Direct")) %>%
   ggplot(aes(fill = data, color = data, group = interaction(.variable, Model), x = .value, y = Model)) +
-  stat_pointinterval(point_size=1.7) +
+  stat_pointinterval(point_size=1.7, .width = c(0.80, 0.95)) +
   facet_grid(~data ~ ., scales="free", space = "free", labeller = "label_parsed") +
   theme_bw(base_size = 12) +
   scale_x_continuous(breaks=c(1e-2, 1e-1, 1e-0), trans="log10",  labels = c(-2, -1, 0), limits = c(1e-2,1e-0)) +

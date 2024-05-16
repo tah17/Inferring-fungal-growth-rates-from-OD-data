@@ -27,7 +27,7 @@ parameters_gompertz %>%
   mutate(data_type = factor(data_type, levels = c("Direct", "Indirect"))) %>%
   mutate(Model = factor(Model, levels=c( "OD/gompertz_OD_calibration_high_IC", "OD/gompertz_OD_calibration", "OD/gompertz_high_IC", "OD/gompertz", "h1/gompertz", "microscopy/gompertz"))) %>%
   ggplot(aes(fill = data_type, color = data_type, x = .value, y = Model)) +
-  stat_pointinterval(point_size=1.7) +
+  stat_pointinterval(point_size=1.7, .width = c(0.80, 0.95)) +
   facet_grid(data_type ~ ., scales="free", space = "free_y", labeller = "label_parsed") +
   theme_bw(base_size = 12) +
   scale_x_continuous(breaks=c(1e-2, 1e-1, 1e-0), trans="log10",  labels = c(-2, -1, 0), limits = c(0.008,1e-0)) +

@@ -6,9 +6,10 @@ library(ggplot2)
 library(reshape2)
 library(tidyverse)
 library(cowplot)
-library(tidybayes)
+library(RColorBrewer)
 seed <- 683861
 set.seed(seed)
+source("R/04_plot/functions.R")
 
 # Read in Data ------------------------------------------------------------
 readRDS(file = "data/OD_all_ICs.Rda") -> df
@@ -19,44 +20,27 @@ df %>% mutate(fungal_ic_new = factor(fungal_ic, labels = fungal_ic_labels)) -> d
 #
 model <- "logistic_OD_calibration"
 source(paste('models/OD/', model, '.data.R', sep = ""))
-prior_pred <- readRDS(file=paste("output/OD/", model, "_full_prior.Rda", sep=""))
-gather_draws(prior_pred, !!str2lang(pop_params2lang)) %>%
-  add_column(distribution = "prior") -> priors
-
-readRDS(file=paste('output/OD/', model, "_prior_draw.Rda", sep="")) %>%
-  add_column(distribution = "fake_data_draw") %>%
-  mutate(Distribution = factor(distribution, levels = c("fake_data_draw"), labels = c("Sample from prior \nthat generates fake data"))) -> fake_data_check_draw
-
-
-readRDS(file=paste('output/OD/', model, "_prior_draw_fit.Rda", sep="")) %>%
-  add_column(distribution = "posterior") -> fake_data_check_post
-
-rbind(priors, fake_data_check_post) %>%
-  mutate(Distribution = factor(distribution, levels = c("prior", "posterior"), labels = c("Prior", "Posterior \n(fake data check)"))) -> draws
+summary_prior_pred <- readRDS(file=paste("output/OD/", model, "_prior.Rda", sep=""))
+y_reps <- summary_prior_pred[grep("^y_tot", row.names(summary_prior_pred)), ] #extracts the y replicates (which are samples from the prior pred) from summary_prior_pred
 #
-# plots
+# plots the mean and 95% quantiles of the samples
 #
-ggplot() +
-  stat_pointinterval(data = draws, aes(x =.variable, y = .value, color=Distribution), position="dodge") +
-  geom_point(data = fake_data_check_draw, aes(y = .value, x = .variable, shape=Distribution), size=2, stroke=1) +
-  theme_bw(base_size = 11) +
-  scale_color_brewer(palette="Dark2") +
-  scale_x_discrete(breaks = c("delta_tilde", "beta", "sigma_meas", "L", "basal", "tau"),
-                  labels = c(expression(tilde(delta)), expression(beta), expression(sigma), "L", "B",  expression(tau))) +
-  scale_shape_manual(name = "", values=4) +
-  xlab("Parameter") +
-  ylab("Value") -> p
+cbind(get_processed_df(df), y_rep = y_reps$mean, y_rep_upper = y_reps$`97.5%`, y_rep_lower = y_reps$`2.5%`) %>%
+  mutate(mean_y_upper = mean(y_rep_upper)) %>%   #gets the mean of the quantiles of the y_reps
+  mutate(mean_y_lower = mean(y_rep_lower)) %>%
+  ggplot(aes(x = time, y = OD, group = interaction(fungal_ic, technical_reps, biological_reps))) +
+  geom_ribbon(aes(ymin = y_rep_lower, ymax = y_rep_upper), fill = "lightgrey", alpha = .5) +
+  geom_point(size=0.1) +
+  facet_grid(. ~ fungal_ic_new, labeller="label_parsed") +
+  scale_y_log10() +
+  geom_line(alpha=.5) +
+  theme_bw(base_size = 12) +
+  xlab("Time [hrs]") +
+  ylab("OD") -> p
 
-tiff("FigS9.tif", width = 19, height = 7, units = "cm", res=300)
+tiff("FigS9.tif", width = 19, height = 5.5, units = "cm", res=300)
 p
 dev.off()
-png("FigS9.png", width = 19, height = 7, units = "cm", res=300)
+png("FigS9.png", width = 19, height = 5.5, units = "cm", res=300)
 p
 dev.off()
-#
-# get specific CIs for logistic-OD-calibration model fake data check
-#
-# draws %>%
-#   filter(distribution=="posterior") %>%
-#   group_by(.variable) %>%
-#   summarise(median_qi(.value, .width = c(.95))) -> post_cis
