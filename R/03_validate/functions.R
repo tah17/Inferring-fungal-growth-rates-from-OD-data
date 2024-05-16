@@ -42,7 +42,7 @@ get_metrics <- function(dat_i, stan_i) {
     mutate(lpd = log(lpds)) %>%
     filter(!missing_data) %>%  #do not want to eval. performance on missing data
     group_by(fold_ID, training_data, testing_data) %>%
-    summarise(accs = c(as.list(accuracy(OD, y_rep)), sum(lpd))) %>%
+    summarise(accs = c(as.list(accuracy(OD, y_rep)), mean(lpd))) %>%
     mutate(accs = as.numeric(accs)) %>%
     mutate(Metric = c('ME', 'RMSE', 'MAE', 'MPE', 'MAPE', 'LPD')) %>%
     group_by(Metric, training_data, testing_data) %>%
